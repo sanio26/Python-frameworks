@@ -1,0 +1,154 @@
+from tkinter import *
+import random
+from tkinter import messagebox
+from tkinter import ttk
+import os
+import tempfile
+
+root = Tk()
+root.title("Billing Management")
+root.state('zoomed')
+#============================BILL AREA TEXT VARIABLE=============================
+c_name=StringVar()
+c_mobile=StringVar()
+item=StringVar()
+rate=IntVar()
+quantity=IntVar()
+bill_no=StringVar()
+x=random.randint(1000,9999)
+bill_no.set(str(x))
+global li
+li=[]
+#===================================TOP SECTION======================================
+Label(root,text="Billing Management",font=("calibri",25,"bold"),relief=GROOVE,bg="yellow",fg="darkblue").pack(side=TOP,fill=X)
+
+#===================================CUSTOMER DETAILS==================================
+entryfrm=LabelFrame(root,text="Customer Details",font=("calibri",15,"bold"),height=110,width=1300,bd=3,bg="lightpink")
+entryfrm.place(x=20,y=70)
+
+Label(entryfrm,text="CUSTOMER NAME",font=("calibri",14,"bold"),fg="darkblue",bg="lightpink").place(x=50,y=20)
+cname=Entry(entryfrm,font=("calibri",14,"bold"),width=30,textvariable=c_name)
+cname.place(x=250,y=20)
+cname.focus()
+
+Label(entryfrm,text="MOBILE NUMBER",font=("calibri",14,"bold"),fg="darkblue",bg="lightpink").place(x=750,y=20)
+cmobile=Entry(entryfrm,font=("calibri",14,"bold"),width=30,textvariable=c_mobile)
+cmobile.place(x=950,y=20)
+
+def comboclick(event):
+    pqty.delete(0,END)
+    pqty.focus()
+    data=pname.get()
+    if data=="HP Laptop":
+        rate.set(27500)
+    elif data=="Dell Laptop":
+        rate.set(33000)
+    elif data=="Acer Laptop":
+        rate.set(24300)
+    elif data=="Toshiba Laptop":
+        rate.set(37500)
+
+#================================PRODUCT DETAILS================================
+productfrm=LabelFrame(root,text="PRODUCT DETAILS",font=("calibri",14,"bold"),height=280,width=700,bd=3,bg="lightblue")
+productfrm.place(x=20,y=200)
+
+Label(productfrm,text="PRODUCT NAME",font=("calibri",14,"bold"),fg="darkblue",bg="lightblue").place(x=50,y=20)
+pname=ttk.Combobox(productfrm,font=("calibri",15),width=28,textvariable=item,state="readonly")
+pname['values']=["HP Laptop","Dell Laptop","Lenovo Laptop","Acer Laptop","Toshiba Laptop"]
+pname.set("Select Product Name")
+pname.place(x=250,y=20)
+pname.bind("<<ComboboxSelected>>",comboclick)
+
+Label(productfrm,text="PRODUCT RATE",font=("calibri",14,"bold"),fg="darkblue",bg="lightblue").place(x=50,y=70)
+prate=Entry(productfrm,font=("calibri",14,"bold"),width=30,textvariable=rate)
+prate.place(x=250,y=70)
+
+Label(productfrm,text="QUANTITY",font=("calibri",14,"bold"),fg="darkblue",bg="lightpink").place(x=50,y=120)
+pqty=Entry(productfrm,font=("calibri",14,"bold"),width=30,textvariable=quantity)
+pqty.place(x=250,y=120)
+
+def close():
+    op=messagebox.askyesno("Save Bill","Do you want to save bill?")
+    if op>0:
+        root.destroy()
+def addItem():
+    pr=rate.get()
+    amt=quantity.get()*pr
+    li.append(amt)
+    if item.get()=="":
+        messagebox.showerror("Error in input","Please Enter the item")
+    else:
+        txtArea.insert(END,f"\n{item.get()}\t\t\t{quantity.get()}\t\t{amt}")
+        rate.set(" ")
+        quantity.set(" ")
+        prate.focus()
+
+def gbill():
+    if c_name.get()==" " or c_mobile.get()==" ":
+        messagebox.showerror("Error in input","Please enter customer name and mobile number")
+    else:
+        tex=txtArea.get(10.0,(10+float(len(li))))
+        welcome()
+        txtArea.insert(END,tex)
+        txtArea.insert(END,f"\n=======================================================================")
+        txtArea.insert(END,f"\n Total Pay Bill Amount:\t\t\t{sum(li)}")
+        txtArea.insert(END,f"\n\n======================================================================")
+        savebill()
+def savebill():
+    op=messagebox.askyesno("Save bill","Do you want to save bill?")
+    if op>0:
+        bill_details=txtArea.get(1.0,END)
+        fi=open("Bills/"+ str(bill_no.get())+".txt","w")
+        fi.write(bill_details)
+        fi.close()
+        messagebox.showinfo("saved",f"BILL NO:{bill_no.get()} saved")
+    else:
+        return
+def clear():
+    c_name.set("")
+    c_mobile.set("")
+    rate.set(" ")
+    quantity.set("")
+    cname.focus()
+    welcome()
+
+Button(productfrm,text="Add Item",font=("calibri",15,"bold"),bg="yellow",width=10,command=addItem).place(x=40,y=180)
+Button(productfrm,text="GENERATE BILL",font=("calibri",15,"bold"),width=15,bg="lightpink",command=gbill).place(x=180,y=180)
+Button(productfrm, text="CLEAR", font=("calibri", 15, "bold"), width=10, bg="lightgreen", command=clear).place(x=380, y=180)
+Button(productfrm, text="EXIT", font=("calibri", 15, "bold"), width=10, bg="yellow", command=close).place(x=520, y=180)
+#=============================BILL AREA=================================
+billfrm=Frame(root,relief=GROOVE,bd=5)
+billfrm.place(x=750,y=200,width=565,height=450)
+
+Label(billfrm,text="BILL AREA",font=("calibri",17,"bold"),bd=5,relief=GROOVE,bg="lightgreen").pack(fill=X)
+scroll_y=Scrollbar(billfrm,orient=VERTICAL)
+txtArea=Text(billfrm,yscrollcommand=scroll_y,font=("calibri",14,"bold"))
+scroll_y.pack(side=RIGHT,fill=Y)
+scroll_y.config(command=txtArea.yview)
+txtArea.pack()
+#=====================PRINT AREA=============================
+printfrm=LabelFrame(root,text="PRINT SELECTION",font=("calibri",15,"bold"),height=150,width=700,bd=3,bg="lightgreen")
+printfrm.place(x=20,y=500)
+
+def print():
+    print_content=tempfile.mktemp('.txt')
+    open(print_content,"w").write(txtArea.get(1.0,END))
+    os.startfile(print_content,"print")
+
+Button(printfrm,text="PRINT BILL",font=("calibri",15,"bold"),width=15,bg="darkblue",fg="white",command=print).place(x=230,y=20)
+Label(printfrm,text="Created and Designed By SANIO EDITING HUB | Banglore",font=("calibri",14,"bold"),bg="lightgreen",fg="darkblue").place(x=80,y=80)
+#===========================FUNTION=============================
+def welcome():
+    txtArea.delete(1.0,END)
+    txtArea.insert(END,"\t\t Welcome to Sanio Tech Store")
+    txtArea.insert(END,f"\n=========================================================")
+    txtArea.insert(END,f"\n\t Bill Number \t\t\t{bill_no.get()}")
+    txtArea.insert(END,f"\n\t Customer Name\t\t\t{c_name.get()}")
+    txtArea.insert(END,f"\n\t Mobile Number\t\t\t{c_mobile.get()}")
+    txtArea.insert(END,f"\n===========================================================")
+    txtArea.insert(END,f"\n Product Name \t\t\t Quantity\t\t Price")
+    txtArea.insert(END,f"\n===========================================================\n")
+
+welcome()
+root.mainloop()
+
