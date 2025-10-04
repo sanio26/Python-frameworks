@@ -1,0 +1,98 @@
+from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
+from demo import Database
+
+
+em=Database("emplo.db")
+
+root=Tk()
+root.title("Employee Management System")
+root.geometry("1250x550+60+10")
+name=StringVar()
+mobile=StringVar()
+course=StringVar()
+lbltitle=Label(root,text="Employee Management System",font=("calibri",18,"bold"),bg="#535c68",fg="white")
+lbltitle.pack(fill=X)
+mainframe=Frame(root,highlightcolor='blue',highlightthickness=2,highlightbackground='blue',height=470,width=500)
+mainframe.place(x=20,y=50)
+lblname=Label(mainframe,text="Name",font=("calibri",15,"bold"))
+lblname.place(x=20,y=50)
+txtname=Entry(mainframe,textvariable=name,font=("calibri",15),width=25)
+txtname.place(x=200,y=50)
+txtname.focus()
+lblmobile=Label(mainframe,text="Mobile",font=("calibri",15,"bold"))
+lblmobile.place(x=20,y=100)
+txtmobile=Entry(mainframe,textvariable=mobile,font=("calibri",15),width=25)
+txtmobile.place(x=200,y=100)
+
+lblcourse=Label(mainframe,text="Course",font=("calibri",15,"bold"))
+lblcourse.place(x=20,y=150)
+txtcourse=Entry(mainframe,textvariable=course,font=("calibri",15),width=25)
+txtcourse.place(x=200,y=150)
+
+def getdata(event):
+    selected_row=tv.focus()
+    data=tv.item(selected_row)
+    global row
+    row=data['values']
+    name.set(row[1])
+    mobile.set(row[2])
+    course.set(row[3])
+def displayAll():
+    tv.delete(*tv.get_children())
+    for row in em.Fetch():
+        tv.insert("",END,values=row)
+def add_emp():
+    if txtname.get()=="" or txtmobile.get()=="" or txtcourse=="":
+        messagebox.showerror("Error","Please fill all fields")
+        return
+    em.Insert(txtname.get(),txtmobile.get(),txtcourse.get())
+    messagebox.showinfo("Success","Employee Added")
+    txtname.focus()
+    displayAll()
+
+def update_emp():
+    if txtname.get()=="" or txtmobile.get()=="" or txtcourse=="":
+        messagebox.showerror("Error","Please fill all fields")
+        return
+    em.update(row[0],txtname.get(),txtmobile.get(),txtcourse.get())
+    messagebox.showinfo("Success","Employee Updated")
+    clear()
+    displayAll()
+def delete_emp():
+    em.remove(row[0])
+    messagebox.showinfo("Success","Employee Deleted")
+    clear()
+    displayAll()
+def clear():
+    name.set(" ")
+    mobile.set(" ")
+    course.set(" ")
+    txtname.focus()
+
+btnframe=Frame(mainframe,highlightcolor="red",highlightthickness=2,highlightbackground='red',height=210,width=435)
+btnframe.place(x=30,y=220)
+Button(btnframe,text="Add Details",command=add_emp,width=15,font=("calibri",15,"bold"),bg="#16a085",fg="white",bd=2).place(x=30,y=45)
+Button(btnframe,text="Update Details",command=update_emp,width=15,font=("calibri",15,"bold"),bg="#298Bb9",fg="white",bd=2).place(x=245,y=45)
+Button(btnframe,text="Delete Details",command=delete_emp,width=15,font=("calibri",15,"bold"),bg="#c8392b",fg="white",bd=2).place(x=30,y=115)
+Button(btnframe,text="Clear Details",command=clear,width=15,font=("calibri",15,"bold"),bg="#f39c12",fg="white",bd=2).place(x=240,y=115)
+treeframe=Frame(root,highlightcolor="green",highlightthickness=2,highlightbackground='green',height=470,width=300)
+treeframe.place(x=550,y=50)
+style=ttk.Style()
+style.configure("mystyle.Treeview",font=("calibri",13),rowheight=24)
+style.configure("mystyle.Treeview.Heading",font=("calibri",13,"bold"))
+tv=ttk.Treeview(treeframe,columns=(1,2,3,4),style="mystyle.Treeview")
+tv.heading("1",text="ID")
+tv.column("1",width=155)
+tv.heading("2",text="name")
+tv.column("2",width=180)
+tv.heading("3",text="Mobile")
+tv.column("3",width=155)
+tv.heading("4",text="Course")
+tv.column("4",width=170)
+tv['show']="headings"
+tv.bind("<ButtonRelease-1>",getdata)
+tv.pack()
+displayAll()
+root.mainloop()
