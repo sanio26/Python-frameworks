@@ -1,0 +1,119 @@
+from tkinter import *
+from tkinter import messagebox
+from tkinter import ttk
+from jdemo import Database
+
+em=Database("jewel.db")
+
+root=Tk()
+root.title("jewel shop")
+root.state("zoomed")
+jewelname=StringVar()
+jewelweight=StringVar()
+gst=IntVar()
+wastage=IntVar()
+makingcharge=IntVar()
+amount=IntVar()
+
+lbltitle=Label(root,text="Jewellary Shop",font=("calibri",18,"bold"),bg="#535c68",fg="white")
+lbltitle.pack(fill=X)
+mainframe=Frame(root,highlightcolor='blue',highlightthickness=2,highlightbackground='blue',height=80,width=900)
+mainframe.place(x=20,y=50)
+lblname=Label(mainframe,text="JewelName",font=("calibri",15,"bold"))
+lblname.place(x=10,y=42)
+jewelname=Entry(mainframe,textvariable=jewelname,font=("calibri",15),width=10)
+jewelname.place(x=135,y=45)
+jewelname.focus()
+lblweight=Label(mainframe,text="JewelWeight",font=("calibri",15,"bold"))
+lblweight.place(x=260,y=45)
+txtweight=Entry(mainframe,textvariable=jewelweight,font=("calibri",15),width=10)
+txtweight.place(x=385,y=45)
+
+
+
+
+def getdata(event):
+    selected_row=tv.focus()
+    data=tv.item(selected_row)
+    global row
+    row=data['values']
+    jewelname.set(row[1])
+    jewelweight.set(row[2])
+
+def displayAll():
+    tv.delete(*tv.get_children())
+    for row in em.Fetch():
+        tv.insert("",END,values=row)
+def add_emp():
+    if jewelname.get()=="" or jewelweight.get()=="" :
+        messagebox.showerror("Error","Please fill all fields")
+        return
+    jewelprice=75000
+    gst=jewelprice/0.23
+    wastage=jewelprice*23/100
+    makingcharge=jewelprice/0.5
+    amount=jewelprice+gst+wastage+makingcharge
+
+
+
+    em.Insert(jewelname.get(),jewelweight.get(),jewelprice,gst,wastage,makingcharge,amount)
+    messagebox.showinfo("Success","jewel Added")
+    jewelname.focus()
+    displayAll()
+
+def update_emp():
+    if jewelname.get()=="" or jewelweight.get()==""  :
+        messagebox.showerror("Error","Please fill all fields")
+        return
+    jewelprice = 75000
+    gst = jewelprice / 0.23
+    wastage = jewelprice * 23 / 100
+    makingcharge = jewelprice / 0.5
+    amount = jewelprice + gst + wastage + makingcharge
+    em.update(row[0],jewelname.get(),jewelweight.get(),jewelprice,gst,wastage,makingcharge,amount)
+    messagebox.showinfo("Success","jewel Updated")
+    clear()
+    displayAll()
+def delete_emp():
+    em.remove(row[0])
+    messagebox.showinfo("Success","jewel Deleted")
+    clear()
+    displayAll()
+def clear():
+    jewelname.set(" ")
+    jewelweight.set(" ")
+
+
+    jewelname.focus()
+
+btnframe=Frame(root,highlightcolor="red",highlightthickness=2,highlightbackground='red',height=210,width=435)
+btnframe.place(x=40,y=150)
+Button(btnframe,text="Add Details",command=add_emp,width=15,font=("calibri",15,"bold"),bg="#16a085",fg="white",bd=2).place(x=30,y=45)
+Button(btnframe,text="Update Details",command=update_emp,width=15,font=("calibri",15,"bold"),bg="#298Bb9",fg="white",bd=2).place(x=245,y=45)
+Button(btnframe,text="Delete Details",command=delete_emp,width=15,font=("calibri",15,"bold"),bg="#c8392b",fg="white",bd=2).place(x=30,y=115)
+Button(btnframe,text="Clear Details",command=clear,width=15,font=("calibri",15,"bold"),bg="#f39c12",fg="white",bd=2).place(x=240,y=115)
+treeframe=Frame(root,highlightcolor="green",highlightthickness=2,highlightbackground='green',height=200,width=300)
+treeframe.place(x=70,y=400)
+style=ttk.Style()
+style.configure("mystyle.Treeview",font=("calibri",13),rowheight=24)
+style.configure("mystyle.Treeview.Heading",font=("calibri",13,"bold"))
+tv=ttk.Treeview(treeframe,columns=(1,2,3,4,5,6,7),style="mystyle.Treeview")
+tv.heading("1",text="ID")
+tv.column("1",width=90)
+tv.heading("2",text="jewelname")
+tv.column("2",width=100)
+tv.heading("3",text="jewelweight")
+tv.column("3",width=100)
+tv.heading("4",text="wastage")
+tv.column("4",width=100)
+tv.heading("5",text="making charge")
+tv.column("5",width=100)
+tv.heading("6",text="GST")
+tv.column("6",width=100)
+tv.heading("7",text="Amount")
+tv.column("7",width=100)
+tv['show']="headings"
+tv.bind("<ButtonRelease-1>",getdata)
+tv.pack()
+displayAll()
+root.mainloop()
